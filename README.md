@@ -22,6 +22,7 @@ This game was forked from [GeoGuess Master Web](https://github.com/spider-hand/G
 ## Table of contents
 
 <!-- TOC -->
+  - [💌 FORK](#-fork)
   - [🃏 Features](#-features)
   - [🚀 Deploy](#-deploy)
   - [📝 Changelog](#-changelog)
@@ -29,6 +30,21 @@ This game was forked from [GeoGuess Master Web](https://github.com/spider-hand/G
   - [📜 License](#-license)
   - [📞 Contact](#-contact)
 <!-- /TOC -->
+
+## 🃏 FORK
+- What is special on this fork?
+- Problem
+  - In the current geoguess the location is estimated completly random
+    - let lat = Math.random() * 170 - 85;
+    - let lng = Math.random() * 360 - 180;
+  - This can result into many times ending up in US or Russia but very rarely in small places
+- Solution
+  - In this fork we try a new aproach to generate random places by first randomly selecting a country and then a place in that country
+  - If you wanna know more check the src\pages\StreetView.vue
+    - 1. get random country as poligon 
+    - 2. break poligon into triangles
+    - 3. get random triangle based on triangle size
+    - 4. find random point in triangle
 
 ## 🃏 Features
 
