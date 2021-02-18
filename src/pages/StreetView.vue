@@ -78,9 +78,12 @@ import {
     getCountryCodeNameFromLatLng,
     getRandomCountry,
     getMaxDistanceBbox,
+    createEarcut,
+    selectRandomTriangle,
+    calcRandomTrianglePoint,
 } from '../utils';
 import { GAME_MODE } from '../constants';
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
     props: {
@@ -172,6 +175,7 @@ export default {
         ...mapGetters(['countriesJson']),
     },
     methods: {
+        ...mapActions(['loadCountries']),
         loadStreetView() {
             const service = new google.maps.StreetViewService();
             let radius, position;
@@ -227,13 +231,44 @@ export default {
                 };
             }
 
-            // Generate a random latitude and longitude
-            let lat = Math.random() * 170 - 85;
-            let lng = Math.random() * 360 - 180;
+            // Generate a random latitude and longitude - old code
+            //let lat = Math.random() * 170 - 85;
+            //let lng = Math.random() * 360 - 180;
+            //let position = new google.maps.LatLng(lat, lng);
+
+            // new code based on country selection
+            let randomcountry = this.countriesJson.features[
+                Math.floor(Math.random() * this.countriesJson.features.length)
+            ];
+            // 1. get random country poligon
+            var poligon = randomcountry.geometry.coordinates[0];
+            // check if we have a MultiPolygon
+            if (randomcountry.geometry.type === 'MultiPolygon') {
+                // NOTE we should weigth the different polygons acording to size
+                poligon =
+                    randomcountry.geometry.coordinates[
+                        Math.floor(
+                            Math.random() *
+                                randomcountry.geometry.coordinates.length
+                        )
+                    ][0];
+            }
+
+            // 2. break poligon into triangles
+            let triangles = createEarcut(poligon);
+            // 3. get random triangle based on triangle size
+            let triangle = selectRandomTriangle(triangles);
+            // 4. find random point in triangle
+            let randpoint = calcRandomTrianglePoint(triangle);
+
+            // convert point to lat/lng/positon
+            let lat = randpoint[1];
+            let lng = randpoint[0];
+            let position = new google.maps.LatLng(lat, lng);
 
             return {
                 radius: 100000,
-                position: new google.maps.LatLng(lat, lng),
+                position: position,
                 properties: null,
             };
         },
@@ -466,6 +501,7 @@ export default {
     },
     async mounted() {
         await this.$gmapApiPromiseLazy();
+        await this.loadCountries();
         this.panorama = new google.maps.StreetViewPanorama(
             document.getElementById('street-view')
         );
