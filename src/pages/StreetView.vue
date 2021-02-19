@@ -237,28 +237,36 @@ export default {
             //let position = new google.maps.LatLng(lat, lng);
 
             // new code based on country selection
+            // 1. get random country
             let randomcountry = this.countriesJson.features[
                 Math.floor(Math.random() * this.countriesJson.features.length)
             ];
-            // 1. get random country poligon
-            var poligon = randomcountry.geometry.coordinates[0];
+            var triangles = [];
+
             // check if we have a MultiPolygon
             if (randomcountry.geometry.type === 'MultiPolygon') {
-                // NOTE we should weigth the different polygons acording to size
-                poligon =
-                    randomcountry.geometry.coordinates[
-                        Math.floor(
-                            Math.random() *
-                                randomcountry.geometry.coordinates.length
-                        )
-                    ][0];
+                // we should to weight all parts of a country the same
+                // we can simply add add triangles of the differnt Polygons to the triangles array and let the selectRandomTriangle function sort things out
+                for (
+                    let index = 0;
+                    index < randomcountry.geometry.coordinates.length;
+                    index++
+                ) {
+                    // 2. cycle trough all country Polygons
+                    poligon = randomcountry.geometry.coordinates[index][0];
+                    // 3. break Polygon into triangles and add to triangles array
+                    triangles = triangles.concat(createEarcut(poligon));
+                }
+            } else {
+                // 2. get country Polygon
+                var poligon = randomcountry.geometry.coordinates[0];
+                // 3. break poligon into triangles
+                triangles = createEarcut(poligon);
             }
 
-            // 2. break poligon into triangles
-            let triangles = createEarcut(poligon);
-            // 3. get random triangle based on triangle size
+            // 4. get random triangle based on triangle size
             let triangle = selectRandomTriangle(triangles);
-            // 4. find random point in triangle
+            // 5. find random point in triangle
             let randpoint = calcRandomTrianglePoint(triangle);
 
             // convert point to lat/lng/positon
