@@ -1,6 +1,8 @@
 <template>
     <div>
         <v-app-bar class="header-game" color="grey darken-4">
+            <img class="gameheader__logo" src="@/assets/beer.png" />
+
             <div
                 id="countdown-timer"
                 v-if="remainingTime != null && remainingTime > 0"
@@ -80,6 +82,12 @@ export default {
 .sub-text {
     color: #616161;
 }
+
+.gameheader__logo {
+    height: 3rem;
+    width: auto;
+}
+
 @media (max-width: 450px) {
     .main-text,
     .sub-text,
